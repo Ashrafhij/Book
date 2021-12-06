@@ -3,6 +3,7 @@ import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+// import {authentication} from './Firebase/firebase-config';
 
 import HomePage from './src/Screens/HomePage';
 import Login from './src/Screens/Login';
@@ -10,6 +11,8 @@ import Signup from './src/Screens/Signup';
 import Providers from './src/Screens/Providers';
 import ProvideSite from './src/Screens/ProvideSite';
 import AppointmentDetails from './src/Screens/AppointmentDetails';
+import OrganizationSite from './src/Screens/OrganizationSite';
+
 
 const Stack = createNativeStackNavigator();
 
@@ -29,6 +32,7 @@ export default function App() {
     <Stack.Screen name="Providers" component={Providers} />
     <Stack.Screen name="ProvideSite" component={ProvideSite} />
     <Stack.Screen name="AppointmentDetails" component={AppointmentDetails} />
+    <Stack.Screen name="OrganizationSite" component={OrganizationSite} />
     </Stack.Navigator>
   </NavigationContainer>
 

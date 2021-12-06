@@ -15,6 +15,7 @@ export default function Searchbar({ value, updateSearch, style }) {
 
     const [query, setQuery] = useState("");
     const [error, setError] = useState()
+    
     return (
         <View style={[styles.container, style]}>
             <View style={styles.searchContainer}>
@@ -61,7 +62,6 @@ export default function Searchbar({ value, updateSearch, style }) {
                         </TouchableOpacity>
                         // : <View style={styles.vwClear} />
                 }
-
             </View>
             {
                 error &&

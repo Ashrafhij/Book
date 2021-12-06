@@ -8,10 +8,18 @@ import {
   Text,
   TextInput,
   Pressable,
+  Alert,
 } from "react-native";
 
 import PhoneInput from "react-native-phone-number-input";
 import { color } from "react-native-reanimated";
+import { addDataDoc } from "../Firebase/firebase";
+
+import { LogBox } from 'react-native';
+
+LogBox.ignoreLogs([
+  'Non-serializable values were found in the navigation state',
+]);
 
 export default function Signup() {
 
@@ -22,14 +30,33 @@ export default function Signup() {
     const phoneInput = useRef(null);
     /*************************************** */
     
-    const [userInput, setUserInput] = useState({mail:'' , phone:'' , password:''})
+    const [userInput, setUserInput] = useState({phone:'' , password:''})
+
+    let createOrganization=(orgDetails ={})=>{
+
+        if (!orgDetails) {
+            return false
+        }else{
+            let orgDetailsTemp = {...orgDetails,services:[{id:1,name:'General Services',duration:15},{id:2,name:'Orders',duration:10},{id:3,name:'Techinical Support',duration:15}],
+            workingHours :[ {start:"07:00",end:"17:00",day:'sunday'},
+                            {start:"08:00",end:"17:00",day:'monday'},
+                            {start:"09:15",end:"17:00",day:'tuesday'},
+                            {start:"10:00",end:"17:00",day:'wednesday'},
+                            {start:"11:00",end:"17:00",day:'thursday'}]}
+            addDataDoc('organization',orgDetailsTemp)
+            
+            return true
+        }
+    }
+
     return (
         <View style={styles.pageContainer}>
             <Text style={styles.textBook}>Book</Text>
             <View style={styles.container}>
-                <TextInput onChangeText={(input)=>{setUserInput({...userInput,orgname:input})}} style={styles.textInput} placeholderTextColor='#8a8a8a' placeholder='Organization Name'/>
-                <TextInput onChangeText={(input)=>{setUserInput({...userInput,orgusername:input})}} style={styles.textInput} placeholderTextColor='#8a8a8a' placeholder='Username'/>
-                <TextInput onChangeText={(input)=>{setUserInput({...userInput,mail:input})}} style={styles.textInput} placeholderTextColor='#8a8a8a' placeholder='Email'/>
+                <TextInput onChangeText={(input)=>{setUserInput({...userInput,name:input})}} style={styles.textInput} placeholderTextColor='#8a8a8a' placeholder='Organization Name'/>
+                <TextInput onChangeText={(input)=>{setUserInput({...userInput,username:input})}} style={styles.textInput} placeholderTextColor='#8a8a8a' placeholder='Username'/>
+                <TextInput onChangeText={(input)=>{setUserInput({...userInput,orgEmail:input})}} style={styles.textInput} placeholderTextColor='#8a8a8a' placeholder='Email'/>
+                <TextInput onChangeText={(input)=>{setUserInput({...userInput,image:input})}} style={styles.textInput} placeholderTextColor='#8a8a8a' placeholder='image URL'/>
                 <View style={styles.phone}>
                     <PhoneInput
                         ref={phoneInput}
@@ -60,7 +87,9 @@ export default function Signup() {
                 <TextInput secureTextEntry={true} style={styles.passwordStyle} placeholderTextColor='#8a8a8a' placeholder='Confirm Password'/>
                 </View>
                 <Pressable style={styles.btnStyle} onPress={()=>{
-                    console.log(userInput.mail +' '+userInput.phone+' '+userInput.password);
+                    console.log("userInput => " ,userInput)
+                    createOrganization(userInput)
+                    // console.log(userInput.mail +' '+userInput.mail +' '+userInput.phone+' '+userInput.password);
                     }}>
                     <Text style={styles.textStyle}>signup </Text>
                 </Pressable>
@@ -86,7 +115,7 @@ const styles = StyleSheet.create({
         backgroundColor:'#343434',
     },
     textBook:{
-        marginTop:80,
+        marginTop:30,
         textAlign:'center',
         alignItems:'center',
         color:'#1877F2',

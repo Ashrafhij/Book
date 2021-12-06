@@ -12,6 +12,7 @@ import {
 } from "react-native";
 
 import PhoneInput from "react-native-phone-number-input";
+import { addDataDoc } from "../Firebase/firebase";
 // import { color } from "react-native-reanimated";
 
 
@@ -23,40 +24,64 @@ export default function ProvideSite({navigation,route}) {
     const phoneInput = useRef(null);
     /*************************************** */
     const [userInput, setUserInput] = useState({orgname:'' })
-    const [query, setQuery] = useState("");
+
+    /* customer details */
+    const [cusName, setcusName] = useState();
+    const [cusPhone, setcusPhone] = useState();
+    const [cusEmail, setcusEmail] = useState();
+
+    const [query, setQuery] = useState(false);
+
+    let createAppointment=(appDetails ={})=>{
+
+        if (!appDetails) {
+            return false
+        }else{
+            // console.log(appDetails)
+            // let appDetailsTemp = {...appDetails}
+            addDataDoc('appointments',appDetails)
+            return true
+        }
+    }
 
     return (
         <View style={styles.pageContainer}>
-            <Image source={{uri:route.params.userInput.img}} style={{width :"100%",height:"40%",borderRadius:10}}/>
-            <Text style={styles.textBook}>{route.params.userInput.orgname}</Text>
+            <Image source={{uri:route.params?.userInput.img}} style={{width :"100%",height:"40%",borderRadius:10}}/>
+            <Text style={styles.textBook}>{route.params?.userInput.orgname}</Text>
             {/* <Text>{JSON.stringify(route.params)} </Text> */}
             <Text style={styles.presstylecolor2}>Enter Phone or Email</Text>
+            {/* {
+                console.log(route.params?.userInput.date , route.params?.userInput.hour)
+            } */}
                  <View style={{flexDirection: 'row', alignItems: 'center',margin:30 }}>
                      <Pressable style={styles.presstyle2} onPress={()=>{
-                            setQuery("")
+                            setQuery(false)
                         }}>
                         <Text style={styles.presstylecolor}>Phone</Text>
                     </Pressable>
                             <View>
                                 <Text style={{width: 50, textAlign: 'center' , color:'white' }}>|</Text>
                             </View>
-                            <Pressable style={styles.presstyle2} onPress={()=>{
-                            setQuery("asas")
+                    <Pressable style={styles.presstyle2} onPress={()=>{
+                            setQuery(true)
                         }}>
                         <Text style={styles.presstylecolor}>Email</Text>
                     </Pressable>
                 </View>
+                <View>
+                        <TextInput onChangeText={(input)=>{setUserInput({...userInput,cusName:input}),setcusName(input)}} style={styles.nameInput} placeholderTextColor='#8a8a8a' placeholder='Customer Name'/>
+                    </View>
             {
                     query ?
                         <View>
-                            <TextInput onChangeText={(input)=>{setUserInput({...userInput,orgname:input})}} style={styles.textInput} placeholderTextColor='#8a8a8a' placeholder='Email Address'/>
+                            <TextInput onChangeText={(input)=>{setUserInput({...userInput,cusEmail:input}),setcusEmail(input)}} style={styles.textInput} placeholderTextColor='#8a8a8a' placeholder='someone@example.com'/>
                         </View>
-                        : 
+                        :
                         <PhoneInput
                             ref={phoneInput}
                             defaultValue={value}
                             defaultCode="IL"
-                            onChangeText={(input)=>{setUserInput({...userInput,phone:input})}}
+                            onChangeText={(input)=>{setUserInput({...userInput,cusPhone:input}),setcusPhone(input)}}
                             // onChangeFormattedText={(text) => {
                             // setValue(text);
                             // }}
@@ -67,9 +92,16 @@ export default function ProvideSite({navigation,route}) {
                         
             }
             <Pressable style={styles.btnStyle1} onPress={()=>{
-                    navigation.navigate('Signup')
+                    let tempinfo = {cusName:cusName,
+                                    cusPhone:cusPhone,
+                                    appDate:route.params?.userInput.date,
+                                    orgID:route.params?.userInput.orgID,
+                                    appHour:route.params?.userInput.hour,
+                                    serviceID:route.params?.userInput.serviceID}
+                    createAppointment(tempinfo)
+                    navigation.navigate('HomePage')
                     }}>
-                    <Text style={styles.textStyle2}>Next</Text>
+                    <Text style={styles.textStyle2}>Book Now</Text>
             </Pressable>
         </View>
     )
@@ -177,11 +209,23 @@ const styles = StyleSheet.create({
         width:330,
         height:60,
         borderRadius:2.1,
-        // textAlign:'center',
+        textAlign:'center',
         // color:'red',
         padding:15,
         // borderColor:'#8a8a8a',
         borderWidth:1,
+    },
+    nameInput:{
+        backgroundColor:'white',
+        color:'black',
+        width:330,
+        height:50,
+        borderRadius:2.1,
+        textAlign:'center',
+        // color:'red',
+        padding:15,
+        // borderColor:'#8a8a8a',
+        borderWidth:2,
     },
     or:{
         color:'white',

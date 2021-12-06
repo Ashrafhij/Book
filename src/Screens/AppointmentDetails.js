@@ -8,6 +8,7 @@ import {
   StatusBar,
   TouchableOpacity,
   Text,
+  ScrollView,
   TextInput,
   Pressable,
   Button,
@@ -15,11 +16,20 @@ import {
 
 import { Ionicons } from '@expo/vector-icons';
 import { Fontisto } from '@expo/vector-icons';
+import Moment from 'moment';
+import { MaterialIcons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
 
 export default function AppointmentDetails({navigation,route}) {
     const [sectionToShow, SetsectionToShow] = useState('chooseSerivce');
+    /* Provider Time Variables */
+    const [selectedServiceDuration, SetselectedServiceDuration] = useState('');
+    const [selectedServiceID, SetselectedServiceID] = useState('');
+    const [selectedOrgID, SetselectedOrgID] = useState('');
+    const [selectedServiceWorkHours, SetselectedServiceWorkHours] = useState([]);
+
+    /* *********************** */
     const [previousSection, SetpreviousSection] = useState('');
     const [day, SetDay] = useState('');
     const [month, SetMonth] = useState('');
@@ -30,6 +40,7 @@ export default function AppointmentDetails({navigation,route}) {
     const [date, setDate] = useState(new Date());
     const [displayDate, SetdisplayDate] = useState(false);
     const [showSelectedDate, SetshowSelectedDate] = useState(false);
+    Moment.locale('en');
 
     const onChange = (event, selectedDate) => {
         const currentDate = selectedDate || date;
@@ -40,7 +51,60 @@ export default function AppointmentDetails({navigation,route}) {
         SetdisplayDate(false)
         SetshowSelectedDate(true)
     };
+    
+
+    let splitHours = ()=>
+    {
+        var startTime,middleStartMin,endTime,middleEndMin;
+        var days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+        var dayName = days[date.getDay()];
+        var workhoursArr = selectedServiceWorkHours;
+        {Object.entries(workhoursArr).map((arr)=>{
+            if(arr[1].day == dayName){
+                /* convert from string start hour to integer number  */ 
+                startTime = arr[1].start
+                var array = startTime.split(":");
+                var hours = (parseInt(array[0], 10))
+                startTime = hours
+                hours = (parseInt(array[1], 10))
+                middleStartMin = hours
+                /* convert from string close hours to integer number  */ 
+                endTime = arr[1].end
+                var array = endTime.split(":");
+                var hours = (parseInt(array[0], 10))
+                endTime = hours
+                hours = (parseInt(array[1], 10))
+                middleEndMin = hours
+            }
+        })}
+        var arr = [], i, j;
+        for(i=startTime*60+middleStartMin; i<endTime*60+middleEndMin; i=i+selectedServiceDuration) {
+            arr.push({id:Math.random()*56 , hour: Math.floor(i/60) + ":" + i%60} );
+        }
+        return arr;
+    }
+
     /******************************************* */
+    let Availableappointments = (
+        <View style={styles.selecAppointmentContainer}>
+            <Text style={styles.selecAppointmentText}>Select Appointment From The List</Text>
+            <FlatList
+            // data={route.params.userInput.services}
+            horizontal={true}
+            showsHorizontalScrollIndicator={false}
+            data={splitHours()}
+            renderItem={({item}) => 
+                <TouchableOpacity key={item.id} style={styles.listItemStyle} onPress={()=> {
+                    navigation.navigate('ProvideSite',{userInput:{orgname:route.params.userInput.orgname,img:route.params.userInput.img,services:route.params.userInput.services,date:date,hour:item.hour,orgID:selectedOrgID,serviceID:selectedServiceID}})
+                 }}>
+                    <MaterialIcons name="date-range" size={24} color="white" />
+                    <Text style={styles.datetimePicker}>{day}/{month}       </Text>
+                    <MaterialIcons name="access-time" size={24} color="white" />
+                    <Text style={styles.datetimePicker}>{item.hour}</Text>
+                </TouchableOpacity>}
+            />
+        </View>
+    )
 
     let chooseSerivce = (
         <View>
@@ -50,10 +114,14 @@ export default function AppointmentDetails({navigation,route}) {
             renderItem={({item}) => <TouchableOpacity key={item.id} style={styles.listItemStyle}
             onPress={()=> { 
                 // navigation.navigate('ProvideSite',{userInput:{orgname:route.params.userInput.orgname,img:route.params.userInput.img}}) 
+                SetselectedServiceID(item.id)
+                SetselectedOrgID(route.params.userInput.providerinfo.orgID)
+                SetselectedServiceDuration(item.duration)
+                SetselectedServiceWorkHours(route.params.userInput.wHours)
                 SetpreviousSection("chooseSerivce")
                 SetsectionToShow("chooseDate")
                 }}>
-                <Ionicons name="cut-sharp" size={24} color="white" />
+                {/* <Ionicons name="cut-sharp" size={24} color="white" /> */}
                 <Text style={styles.textStyle2}>{item.name}</Text>
                 </TouchableOpacity>}
             />
@@ -63,17 +131,24 @@ export default function AppointmentDetails({navigation,route}) {
     let chooseDate = (
         <View>
             <Text style={styles.twoSectionsText}>Appointment Date</Text>
-            <Fontisto name="date" style={styles.dateView} onPress={()=> { 
-                SetdisplayDate(true)
-            }} />
-            {/* <Button onPress={()=> { 
-                SetdisplayDate(true)
-            }}
-            title='choose date'
-            > </Button> */}
+            <View style={styles.dateViewContainer}>
+                <Fontisto name="date" style={styles.dateView} onPress={()=> { 
+                    SetdisplayDate(true)
+                }} />
+                <Pressable style={styles.selectedateStyle} onPress={()=>{
+                    SetdisplayDate(true)
+                    }}>
+                    {
+                        day == "" ?
+                            <Text style={styles.presstylecolor}>{new Date().getDate()}-{new Date().getMonth() + 1}-{new Date().getFullYear()}</Text>
+                        :
+                            <Text style={styles.presstylecolor}>{day}-{month}-{year}</Text>
+                    }
+                </Pressable>
+            </View>
             {
             displayDate ?
-                    <View>
+                    <View style={styles.twoSectionsText}>
                         <DateTimePicker
                             value={date}
                             onChange={onChange}
@@ -81,26 +156,22 @@ export default function AppointmentDetails({navigation,route}) {
                     </View>
                         
                     :
-                    showSelectedDate ? 
-                        <Text style={styles.textStyle2}>{day}-{month}-{year}</Text>
+                    showSelectedDate ?
+
+                        Availableappointments
                     :
                         null
             }
-            {/* <Button onPress={()=> { 
-            SetpreviousSection("chooseDate")
-            SetsectionToShow("showAvailableAppointments")
-            }}
-            title='choose date'
-            >
-            </Button> */}
         </View>
         )
+
+    /******************************************* */
     
-    let showAvailableAppointments = (<View><Button onPress={()=> { 
-        // SetpreviousSection("chooseDate")
-        }}
-        title='show available'
-        > </Button></View>)
+    // let showAvailableAppointments = (<View><Button onPress={()=> { 
+    //     // SetpreviousSection("chooseDate")
+    //     }}
+    //     title='show available'
+    //     > </Button></View>)
 
     let showRelativeSection= (sectionToShow) =>{
         if (sectionToShow=="chooseSerivce") {
@@ -163,13 +234,17 @@ const styles = StyleSheet.create({
         width:"80%",
         direction:"rtl",
     },
+    // flatListStyleDatetime:{
+    // },
     listItemStyle:{
         display:'flex',
         flexDirection:'row',
+        alignItems:'center',
+        // justifyContent:'center',
         borderColor:"#1877F2",
         borderWidth:2,
         borderRadius:4,
-        padding:15,
+        padding:10,
         marginBottom:10,
     },
     phoneContainer:{
@@ -177,16 +252,29 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         backgroundColor:'red',
     },
+    selecAppointmentContainer:{
+        padding:"5%",
+        display:'flex',
+        height:"36%",
+        justifyContent:'center',
+        alignItems:'center',
+    },
     arrow:{
         paddingTop:'1.5%',
         paddingRight:"85%",
         fontSize:28,
         color:"#1877F2",
     },
+    dateViewContainer:{
+        // backgroundColor:'red',
+        alignItems:"center",
+        textAlign:'center',
+    },
     dateView:{
-        paddingTop:'1.5%',
-        // paddingRight:"85%",
-        paddingLeft:"20%",
+        // backgroundColor:'red',
+        // paddingTop:'1.5%',
+        alignItems:"center",
+        textAlign:'center',
         fontSize:70,
         color:"#1877F2",
     },
@@ -210,9 +298,19 @@ const styles = StyleSheet.create({
     twoSectionsText:{
         paddingBottom:"5%",
         textAlign:'center',
-        alignItems:'center',
         color:'#1877F2',
         fontSize:28,
+        fontWeight: "bold",
+        textShadowColor: 'rgba(0, 0, 0, 0.75)',
+        textShadowOffset: {width: -1, height: 1},
+        textShadowRadius: 20
+    },
+    selecAppointmentText:{
+        paddingBottom:"5%",
+        textAlign:'center',
+        alignItems:'center',
+        color:'white',
+        fontSize:20,
         fontWeight: "bold",
         textShadowColor: 'rgba(0, 0, 0, 0.75)',
         textShadowOffset: {width: -1, height: 1},
@@ -255,6 +353,11 @@ const styles = StyleSheet.create({
         width:60,
         height:40
     },
+    selectedateStyle:{
+        alignItems:'center',
+        justifyContent:'center',
+        height:40
+    },
     presstylecolor2:{
         paddingTop:15,
         color:'white',
@@ -264,7 +367,7 @@ const styles = StyleSheet.create({
     presstylecolor:{
         
         // paddingTop:15,
-        color:'#1877F2',
+        color:'white',
         fontSize:18,
         fontWeight:'bold',
     },
@@ -277,6 +380,11 @@ const styles = StyleSheet.create({
     textStyle2:{
         marginLeft:15,
         fontSize:20,
+        color:'#F0FFFF',
+    },
+    datetimePicker:{
+        marginLeft:5,
+        fontSize:16,
         color:'#F0FFFF',
     },
     textInput:{

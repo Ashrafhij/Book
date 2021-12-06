@@ -1,5 +1,5 @@
 import React,{useState} from 'react'
-import { View, Text, StyleSheet,Pressable,TextInput } from 'react-native'
+import { View, Text, StyleSheet,Pressable } from 'react-native'
 import LinearGradient from 'react-native-linear-gradient';
 
 export default function HomePage({navigation}) {
@@ -25,7 +25,6 @@ export default function HomePage({navigation}) {
                 </View>
 
                 <Pressable style={styles.btnStyle2} onPress={()=>{
-                    console.log('sign in');
                     navigation.navigate('Login')
                     }}>
                     <Text style={styles.textStyle}>Sign In as an Organization</Text>

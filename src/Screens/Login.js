@@ -1,11 +1,21 @@
 import React,{useState} from 'react'
 import { View,StyleSheet, Text,Button,TextInput,Pressable } from 'react-native'
 
+
+
+import firestore from "@react-native-firebase/firestore"
+
+let getDoc =async ()=>{
+    const testDocumnet = await firestore().collection('test').doc('oUAAnGKwNq6kFvHeWs62').get();
+    console.log("testDocumnet ",testDocumnet);
+}
+
+
 export default function Login({navigation,route}) {
     const [userInput, setUserInput] = useState({password:'' , username:'' })
     return (
         <View style={styles.pageContainer}>
-            <Text style={styles.textBook}>Book</Text>
+            <Text style={styles.textBook} onPress={()=>getDoc()}>Book</Text>
             <View style={styles.container}>
                 {/* <Text>{JSON.stringify(route.params.userInput.password)}</Text> */}
                 
@@ -13,7 +23,7 @@ export default function Login({navigation,route}) {
                 <TextInput style={styles.textInput} secureTextEntry={true} placeholderTextColor='#8a8a8a' placeholder='Password'/>
 
                 <Pressable style={styles.btnStyle1} onPress={()=>{
-                    navigation.navigate('HomePage')
+                    navigation.navigate('OrganizationSite')
                     }}>
                     <Text style={styles.textStyle}>Log In</Text>
                 </Pressable>
