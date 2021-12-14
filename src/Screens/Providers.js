@@ -15,7 +15,7 @@ export default function Providers({navigation}) {
 
     function updateSearch(value="") {
         setfilteredProviders(providers.filter(provider => {
-            return provider.name.includes(value)
+            return provider.name.toLowerCase().includes(value.toLowerCase())
         }   ))
     }
        
@@ -80,7 +80,7 @@ export default function Providers({navigation}) {
                             <View style={styles.content}>
                                  <Image source={{uri:provider.image}} style={{width :120,height:140,borderRadius:10}}/>
                                  <Text style={{textAlign:'center',fontWeight:'bold',fontSize:20 , color:'#1877F2'}}>{provider.name}</Text>
-                             </View>
+                            </View>
                         </Pressable>
                     )
                 })}
@@ -117,7 +117,9 @@ const styles = StyleSheet.create({
     providerStyle:{
         // flexWrap:"wrap",
         backgroundColor:'#1877F2',
+        // backgroundColor:'red',
         margin:20,
+        marginBottom:40,
         width :120,
         height:140,
         borderRadius:10,
@@ -125,6 +127,5 @@ const styles = StyleSheet.create({
     content:{
         // backgroundColor:'red',
         // flexWrap:"wrap",
-        // backgroundColor:'red',
     },
 })

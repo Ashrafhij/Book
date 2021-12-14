@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef ,useEffect} from "react";
 import {
   FlatList,
   Image,
@@ -17,6 +17,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { Fontisto } from '@expo/vector-icons';
 import Moment from 'moment';
+import { getData } from '../Firebase/firebase';
 import { MaterialIcons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
@@ -26,6 +27,7 @@ export default function AppointmentDetails({navigation,route}) {
     /* Provider Time Variables */
     const [selectedServiceDuration, SetselectedServiceDuration] = useState('');
     const [selectedServiceID, SetselectedServiceID] = useState('');
+    const [selectedServiceName, SetselectedServiceName] = useState('');
     const [selectedOrgID, SetselectedOrgID] = useState('');
     const [selectedServiceWorkHours, SetselectedServiceWorkHours] = useState([]);
 
@@ -36,10 +38,19 @@ export default function AppointmentDetails({navigation,route}) {
     const [year, SetYear] = useState('');
     //states = choose-service || choose-date || show-available-appointments
 
+    //get All Apps From the DB
+    const [apps, setapps] = useState([])
+    useEffect(() => {
+        (getData('appointments').then((allApps)=>{
+            setapps(allApps)
+        }));
+    }, [])
     /*  DATE Region */
     const [date, setDate] = useState(new Date());
     const [displayDate, SetdisplayDate] = useState(false);
     const [showSelectedDate, SetshowSelectedDate] = useState(false);
+
+    const [branchClosed, SetbranchClosed] = useState();
     Moment.locale('en');
 
     const onChange = (event, selectedDate) => {
@@ -52,7 +63,7 @@ export default function AppointmentDetails({navigation,route}) {
         SetshowSelectedDate(true)
     };
     
-
+    // SetselectedOrgID(route.params.userInput.providerinfo.orgID)
     let splitHours = ()=>
     {
         var startTime,middleStartMin,endTime,middleEndMin;
@@ -77,32 +88,53 @@ export default function AppointmentDetails({navigation,route}) {
                 middleEndMin = hours
             }
         })}
+
         var arr = [], i, j;
         for(i=startTime*60+middleStartMin; i<endTime*60+middleEndMin; i=i+selectedServiceDuration) {
             arr.push({id:Math.random()*56 , hour: Math.floor(i/60) + ":" + i%60} );
         }
-        return arr;
+
+        const bookedUpAppointments ={};
+         apps.map(availableApp=>{
+             if (availableApp.orgID == route.params.userInput.providerinfo.orgID && 
+                availableApp.serviceID == selectedServiceID &&
+                availableApp.appDate == ''+day+''+'/'+month){
+                    bookedUpAppointments[availableApp.appHour] =true
+                }
+         })
+
+        const notReservedArr = arr.filter(element => {
+            return !(bookedUpAppointments[element.hour])
+        });
+
+        return notReservedArr;
     }
 
+
+    // [{hour : "hour : mins"}]
+
     /******************************************* */
+
     let Availableappointments = (
         <View style={styles.selecAppointmentContainer}>
-            <Text style={styles.selecAppointmentText}>Select Appointment From The List</Text>
-            <FlatList
-            // data={route.params.userInput.services}
-            horizontal={true}
-            showsHorizontalScrollIndicator={false}
-            data={splitHours()}
-            renderItem={({item}) => 
-                <TouchableOpacity key={item.id} style={styles.listItemStyle} onPress={()=> {
-                    navigation.navigate('ProvideSite',{userInput:{orgname:route.params.userInput.orgname,img:route.params.userInput.img,services:route.params.userInput.services,date:date,hour:item.hour,orgID:selectedOrgID,serviceID:selectedServiceID}})
-                 }}>
-                    <MaterialIcons name="date-range" size={24} color="white" />
-                    <Text style={styles.datetimePicker}>{day}/{month}       </Text>
-                    <MaterialIcons name="access-time" size={24} color="white" />
-                    <Text style={styles.datetimePicker}>{item.hour}</Text>
-                </TouchableOpacity>}
-            />
+            <View>
+                <Text style={styles.selecAppointmentText}>Select Appointment From The List</Text>
+                <FlatList
+                // data={route.params.userInput.services}
+                horizontal={true}
+                showsHorizontalScrollIndicator={false}
+                data={splitHours()}
+                renderItem={({item}) => 
+                    <TouchableOpacity key={item.id} style={styles.listItemStyle} onPress={()=> {
+                        navigation.navigate('ProvideSite',{userInput:{orgname:route.params.userInput.orgname,img:route.params.userInput.img,services:route.params.userInput.services,date:''+day+''+'/'+month,hour:item.hour,orgID:selectedOrgID,serviceID:selectedServiceID,serviceName:selectedServiceName,img:route.params.userInput.img}})
+                    }}>
+                        <MaterialIcons name="date-range" size={24} color="white" />
+                        <Text style={styles.datetimePicker}>{day}/{month}       </Text>
+                        <MaterialIcons name="access-time" size={24} color="white" />
+                        <Text style={styles.datetimePicker}>{item.hour}</Text>
+                    </TouchableOpacity>}
+                />
+            </View>
         </View>
     )
 
@@ -112,9 +144,10 @@ export default function AppointmentDetails({navigation,route}) {
             <FlatList style={styles.flatListStyle}
             data={route.params.userInput.services}
             renderItem={({item}) => <TouchableOpacity key={item.id} style={styles.listItemStyle}
-            onPress={()=> { 
+            onPress={()=> {
                 // navigation.navigate('ProvideSite',{userInput:{orgname:route.params.userInput.orgname,img:route.params.userInput.img}}) 
                 SetselectedServiceID(item.id)
+                SetselectedServiceName(item.name)
                 SetselectedOrgID(route.params.userInput.providerinfo.orgID)
                 SetselectedServiceDuration(item.duration)
                 SetselectedServiceWorkHours(route.params.userInput.wHours)
@@ -190,8 +223,6 @@ export default function AppointmentDetails({navigation,route}) {
     return (
         <View style={styles.pageContainer}>
             <Image source={{uri:route.params.userInput.img}} style={{width :"100%",height:"40%",borderRadius:10}}/>
-            {/* <Text style={styles.textBook}>{route.params.userInput.orgname}</Text> */}
-            {/* <Text style={styles.textBook}>Choose Service Type</Text> */}
             {
                 previousSection ?
                 <View>

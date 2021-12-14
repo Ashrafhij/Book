@@ -32,6 +32,10 @@ export const getData = async (table = "organization") => {
     let dataSnapShot = await getDocs(dataCol);
     let dataList = dataSnapShot.docs.map((doc) => {
      //  console.log(`${doc.id} => `, doc.data());
+     if (doc.data().orgID) {
+      return doc.data() ;
+       
+     }
       return {...doc.data() , orgID:doc.id};
     });
     return dataList;

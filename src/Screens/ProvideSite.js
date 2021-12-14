@@ -1,8 +1,11 @@
 import React, { useState, useRef } from "react";
 import {
+  Alert,
+  Modal,
   Image,
   SafeAreaView,
   StyleSheet,
+  ImageBackground,
   View,
   StatusBar,
   TouchableOpacity,
@@ -12,8 +15,10 @@ import {
 } from "react-native";
 
 import PhoneInput from "react-native-phone-number-input";
+import { Fontisto } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { addDataDoc } from "../Firebase/firebase";
-// import { color } from "react-native-reanimated";
+import ModalBook from '../Components/ModalBook';
 
 
 export default function ProvideSite({navigation,route}) {
@@ -31,28 +36,118 @@ export default function ProvideSite({navigation,route}) {
     const [cusEmail, setcusEmail] = useState();
 
     const [query, setQuery] = useState(false);
+    const [modalVisible, setModalVisible] = useState(false);
+    const [errormodalVisible, seterrormodalVisible] = useState(false);
 
     let createAppointment=(appDetails ={})=>{
 
         if (!appDetails) {
             return false
         }else{
-            // console.log(appDetails)
-            // let appDetailsTemp = {...appDetails}
             addDataDoc('appointments',appDetails)
             return true
         }
     }
 
+    let errorModal = (
+        <View style={styles.errorcenteredView}>
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={errormodalVisible}
+                onRequestClose={() => {
+                Alert.alert("Modal has been closed.");
+                seterrormodalVisible(!errormodalVisible);
+                }}
+            >
+                <View style={styles.errorcenteredView}>
+                <View style={styles.errormodalView}>
+                <Fontisto name="close-a" size={24} color="black" onPress={()=> { 
+                    seterrormodalVisible(!errormodalVisible);
+                }} />
+                <View style={styles.errorcenteredView}>
+                        <Text style={{fontSize:22,padding:"2%",color:'black',alignItems:'center',
+                                        textAlign:'center',marginBottom:'15%'}}>Wrong Content</Text>
+                    <Pressable
+                    style={[styles.button, styles.buttonClose]}
+                    onPress={() => {
+                        seterrormodalVisible(!errormodalVisible)
+                        }}>
+
+                    <Text style={styles.textStyle}>ok </Text>
+                    </Pressable>
+                    </View>
+                </View>
+                </View>
+            </Modal>
+        </View>
+    )
+
+
+    let modal = (
+        <View style={styles.centeredView}>
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={modalVisible}
+                onRequestClose={() => {
+                Alert.alert("Modal has been closed.");
+                setModalVisible(!modalVisible);
+                }}
+            >
+                <View style={styles.centeredView}>
+                <View style={styles.modalView}>
+                <Fontisto name="close-a" size={24} color="black" onPress={()=> { 
+                    setModalVisible(!modalVisible);
+                }} />
+                <View style={{textAlign:'center',alignItems:'center'}}>
+                    <Text style={styles.modalTitle}>Summary</Text>
+                    <Image source={{uri:route.params?.userInput.img}} style={{width :50,height:40,borderRadius:10}}/>
+                    <Text style={{fontSize:22,padding:"3%"}}>hello {cusName}</Text>
+                    <Text style={{fontSize:18}}>Here is Your Appointment Details:</Text>
+                </View>
+                    
+                <View style={styles.modalText}>
+                    <Text style={styles.summaryTextStyle}>{route.params?.userInput.serviceName}</Text>
+                    <View  style={{alignItems: 'center'}}>
+                        <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                        <Fontisto name="date" size={24} color="black" />
+                        <Text style={styles.summaryTextStyle}>  {route.params?.userInput.date}</Text>
+                        </View>
+                        <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                        <Ionicons name="time" size={24} color="black" />
+                        <Text style={styles.summaryTextStyle}>  {route.params?.userInput.hour}</Text>
+                        </View>
+                    </View>
+                </View>
+                    <Pressable
+                    style={[styles.button, styles.buttonClose]}
+                    onPress={() => {
+                        setModalVisible(!modalVisible)
+                        let tempinfo = {cusName:cusName,
+                            cusPhone:cusPhone,
+                            appDate:route.params?.userInput.date,
+                            orgID:route.params?.userInput.orgID,
+                            appHour:route.params?.userInput.hour,
+                            serviceID:route.params?.userInput.serviceID}
+                        createAppointment(tempinfo)
+                        navigation.navigate('HomePage')
+                        }}>
+
+                    <Text style={styles.textStyle}>Book Now</Text>
+                    </Pressable>
+                </View>
+                </View>
+            </Modal>
+        </View>
+    )
+
+
     return (
         <View style={styles.pageContainer}>
             <Image source={{uri:route.params?.userInput.img}} style={{width :"100%",height:"40%",borderRadius:10}}/>
             <Text style={styles.textBook}>{route.params?.userInput.orgname}</Text>
-            {/* <Text>{JSON.stringify(route.params)} </Text> */}
             <Text style={styles.presstylecolor2}>Enter Phone or Email</Text>
-            {/* {
-                console.log(route.params?.userInput.date , route.params?.userInput.hour)
-            } */}
                  <View style={{flexDirection: 'row', alignItems: 'center',margin:30 }}>
                      <Pressable style={styles.presstyle2} onPress={()=>{
                             setQuery(false)
@@ -92,17 +187,26 @@ export default function ProvideSite({navigation,route}) {
                         
             }
             <Pressable style={styles.btnStyle1} onPress={()=>{
-                    let tempinfo = {cusName:cusName,
-                                    cusPhone:cusPhone,
-                                    appDate:route.params?.userInput.date,
-                                    orgID:route.params?.userInput.orgID,
-                                    appHour:route.params?.userInput.hour,
-                                    serviceID:route.params?.userInput.serviceID}
-                    createAppointment(tempinfo)
-                    navigation.navigate('HomePage')
+                    if (cusName == "" || !cusName) {
+                        seterrormodalVisible(true)
+                    }else{
+                        setModalVisible(true)
+                    }
                     }}>
-                    <Text style={styles.textStyle2}>Book Now</Text>
+                    <Text style={styles.textStyle2}>Book it</Text>
             </Pressable>
+            {
+            modalVisible ? 
+                    modal
+                    :
+                    null
+            }
+            {
+            errormodalVisible ? 
+                    errorModal
+                    :
+                    null
+            }
         </View>
     )
 }
@@ -112,6 +216,11 @@ const styles = StyleSheet.create({
     container:{
         flex:1,
         margin:"7%",
+    },
+    summaryTextStyle:{
+        textAlign:'center',
+        alignItems:'center',
+        fontSize:22,
     },
     pageContainer:{
         flex:1,
@@ -142,6 +251,12 @@ const styles = StyleSheet.create({
         textShadowColor: 'rgba(0, 0, 0, 0.75)',
         textShadowOffset: {width: -1, height: 1},
         textShadowRadius: 20
+    },
+    modalTitle:{
+        paddingBottom:10,
+        color:'#1877F2',
+        fontSize:33,
+        fontWeight: "bold",
     },
     btnStyle1 :{
         marginTop:"10%",
@@ -229,5 +344,64 @@ const styles = StyleSheet.create({
     },
     or:{
         color:'white',
-    }
+    },
+    errorcenteredView: {
+        marginTop: "25%"
+      },
+    centeredView: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        marginTop: 22
+      },
+      modalView: {
+        margin: 20,
+        backgroundColor: "white",
+        borderRadius: 20,
+        padding: 35,
+        // alignItems: "center",
+        shadowColor: "#000",
+        shadowOffset: {
+          width: 0,
+          height: 2
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5
+      },
+      errormodalView: {
+        margin: 20,
+        backgroundColor: "white",
+        borderRadius: 20,
+        padding: "10%",
+        // alignItems: "center",
+        shadowColor: "#000",
+        shadowOffset: {
+          width: 0,
+          height: 2
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5
+      },
+      button: {
+        borderRadius: 20,
+        padding: 10,
+        elevation: 2
+      },
+      buttonOpen: {
+        backgroundColor: "#F194FF",
+      },
+      buttonClose: {
+        backgroundColor: "#2196F3",
+      },
+      textStyle: {
+        color: "white",
+        fontWeight: "bold",
+        textAlign: "center"
+      },
+      modalText: {
+        margin: "8%",
+        textAlign: "center"
+      }
 })

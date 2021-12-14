@@ -1,6 +1,7 @@
 import React,{useState} from 'react'
 import { View, Text, StyleSheet,Pressable } from 'react-native'
 import LinearGradient from 'react-native-linear-gradient';
+import ModalBook from '../Components/ModalBook';
 
 export default function HomePage({navigation}) {
     const [userInput, setUserInput] = useState({password:''})
@@ -23,7 +24,6 @@ export default function HomePage({navigation}) {
                         </View>
                     <View style={{flex: 1, height: 1, backgroundColor: '#8a8a8a'}} />
                 </View>
-
                 <Pressable style={styles.btnStyle2} onPress={()=>{
                     navigation.navigate('Login')
                     }}>
