@@ -12,6 +12,8 @@ import Providers from './src/Screens/Providers';
 import ProvideSite from './src/Screens/ProvideSite';
 import AppointmentDetails from './src/Screens/AppointmentDetails';
 import OrganizationSite from './src/Screens/OrganizationSite';
+import OrganizationAdminPanel from './src/Screens/OrganizationAdminPanel';
+
 
 
 const Stack = createNativeStackNavigator();
@@ -33,6 +35,7 @@ export default function App() {
     <Stack.Screen name="ProvideSite" component={ProvideSite} />
     <Stack.Screen name="AppointmentDetails" component={AppointmentDetails} />
     <Stack.Screen name="OrganizationSite" component={OrganizationSite} />
+    <Stack.Screen name="OrganizationAdminPanel" component={OrganizationAdminPanel} />
     </Stack.Navigator>
   </NavigationContainer>
 

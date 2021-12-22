@@ -19,11 +19,13 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Entypo } from '@expo/vector-icons';
 import { Fontisto } from '@expo/vector-icons';
 import { Ionicons } from '@expo/vector-icons';
+import UploadImage from '../Components/UploadImage'
 import { color } from "react-native-reanimated";
 // import TimePicker from 'react-native-simple-time-picker';
 import { addDataDoc } from "../Firebase/firebase";
 
 import { LogBox } from 'react-native';
+import ExpoImagePicker from "../Components/ExpoImagePicker";
 
 LogBox.ignoreLogs([
   'Non-serializable values were found in the navigation state',
@@ -38,7 +40,8 @@ export default function Signup({navigation}) {
     const phoneInput = useRef(null);
     /*************************************** */
     
-    const [userInput, setUserInput] = useState({phone:'' , password:''})
+    const [userInput, setUserInput] = useState({phone:'' , password:'',image:''})
+    const [secondPassword, setSecondPassword] = useState('')
     const [services, setservices] = useState([]);
     const [orgWHlist, setorgWHlist] = useState([]);
 
@@ -55,6 +58,7 @@ export default function Signup({navigation}) {
     
 
     let errorModal = (
+
         <View style={styles.errorcenteredView}>
             <Modal
                 animationType="slide"
@@ -139,12 +143,31 @@ export default function Signup({navigation}) {
         }
     }
 
+    let validateData=(orgData)=>{
+        let failure = false
+        for(let key in orgData){
+            if( !orgData[key] ){
+                // seterrormodalVisible(true)
+                failure = true
+            }
+        }
+        if(secondPassword.spassword != orgData.password){
+            failure=true
+        }
+        seterrormodalVisible(failure)
+        if( !failure )
+        {
+            SetsectionToShow("orgService")
+        }
+    }
+
     let orgInfoSection = (
         <View>
             <TextInput onChangeText={(input)=>{setUserInput({...userInput,name:input})}} style={styles.textInput} placeholderTextColor='white' placeholder='Organization Name'/>
             <TextInput onChangeText={(input)=>{setUserInput({...userInput,username:input})}} style={styles.textInput} placeholderTextColor='white' placeholder='Username'/>
             <TextInput onChangeText={(input)=>{setUserInput({...userInput,orgEmail:input})}} style={styles.textInput} placeholderTextColor='white' placeholder='Email'/>
-            <TextInput onChangeText={(input)=>{setUserInput({...userInput,image:input})}} style={styles.textInput} placeholderTextColor='white' placeholder='image URL'/>
+            <ExpoImagePicker  saveImageDetails ={(imageUrl)=>{setUserInput({...userInput,image:imageUrl})}}></ExpoImagePicker>
+            {/* <TextInput onChangeText={(input)=>{setUserInput({...userInput,image:input})}} style={styles.textInput} placeholderTextColor='white' placeholder='image URL'/> */}
             <View style={styles.phone}>
                 <PhoneInput
                     ref={phoneInput}
@@ -158,22 +181,10 @@ export default function Signup({navigation}) {
 
             <View style={styles.pass}>
             <TextInput onChangeText={(input)=>{setUserInput({...userInput,password:input})}} secureTextEntry={true} style={styles.passwordStyle} placeholderTextColor='white' placeholder='Password'/>
-            <TextInput secureTextEntry={true} style={styles.passwordStyle} placeholderTextColor='white' placeholder='Confirm Password'/>
+            <TextInput onChangeText={(input)=>{setSecondPassword({...secondPassword,spassword:input})}} secureTextEntry={true} style={styles.passwordStyle} placeholderTextColor='white' placeholder='Confirm Password'/>
             </View>
             <Pressable style={styles.btnStyleOrgInfo} onPress={()=>{
-                userInput.name ? seterrormodalVisible(false) : seterrormodalVisible(true)
-                userInput.username ? seterrormodalVisible(false) : seterrormodalVisible(true)
-                userInput.orgEmail ? seterrormodalVisible(false) : seterrormodalVisible(true)
-                userInput.image ? seterrormodalVisible(false) : seterrormodalVisible(true)
-                userInput.phone ? seterrormodalVisible(false) : seterrormodalVisible(true)    
-                userInput.password ? seterrormodalVisible(false) : seterrormodalVisible(true)
-                
-                if(errormodalVisible == false)
-                {
-                    SetsectionToShow("orgService")
-                }
-                    // console.log("userInput => " ,userInput)
-                    // createOrganization(userInput)
+                validateData(userInput)
                     }}>
                     <Text style={styles.textStyle}>Next</Text>
             </Pressable>
@@ -558,7 +569,7 @@ const styles = StyleSheet.create({
             height:40,
             alignItems:'center',
             justifyContent:'center',
-            marginBottom: 7,
+            marginBottom: "7%",
             // borderWidth:1,
             shadowColor: '#1877F2',  
             shadowOpacity: 1,  

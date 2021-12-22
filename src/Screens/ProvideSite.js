@@ -129,7 +129,8 @@ export default function ProvideSite({navigation,route}) {
                             appDate:route.params?.userInput.date,
                             orgID:route.params?.userInput.orgID,
                             appHour:route.params?.userInput.hour,
-                            serviceID:route.params?.userInput.serviceID}
+                            serviceID:route.params?.userInput.serviceID,
+                            serviceName:route.params?.userInput.serviceName}
                         createAppointment(tempinfo)
                         navigation.navigate('HomePage')
                         }}>

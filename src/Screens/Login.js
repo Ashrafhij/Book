@@ -1,32 +1,66 @@
 import React,{useState} from 'react'
 import { View,StyleSheet, Text,Button,TextInput,Pressable } from 'react-native'
+import {authenticateUser} from '../Firebase/firebase'
 
 
+// import firestore from "@react-native-firebase/firestore"
+import { getData } from '../Firebase/firebase';
 
-import firestore from "@react-native-firebase/firestore"
-
-let getDoc =async ()=>{
-    const testDocumnet = await firestore().collection('test').doc('oUAAnGKwNq6kFvHeWs62').get();
-    console.log("testDocumnet ",testDocumnet);
-}
+// let getDoc =async ()=>{
+//     const testDocumnet = await firestore().collection('test').doc('oUAAnGKwNq6kFvHeWs62').get();
+//     console.log("testDocumnet ",testDocumnet);
+// }
 
 
 export default function Login({navigation,route}) {
+
+    // const [providers, setproviders] = useState([])
+    // let attempToSignIn=(user,pass)=>{
+
+    //     if (!user || !pass) {
+    //         return false
+    //     }else{
+    //         getData('organization').then((allProviders)=>{
+    //             setproviders(allProviders)
+    //         });
+    //         console.log(providers)
+    //         return true
+    //     }
+    // }
+
+    const [errorMessage, setErrorMessage] = useState('')
     const [userInput, setUserInput] = useState({password:'' , username:'' })
     return (
         <View style={styles.pageContainer}>
             <Text style={styles.textBook} onPress={()=>getDoc()}>Book</Text>
             <View style={styles.container}>
-                {/* <Text>{JSON.stringify(route.params.userInput.password)}</Text> */}
-                
-                <TextInput style={styles.textInput} placeholderTextColor='#8a8a8a' placeholder='Phone number or email' />
-                <TextInput style={styles.textInput} secureTextEntry={true} placeholderTextColor='#8a8a8a' placeholder='Password'/>
+                {
+                    errorMessage ? 
+                    <Text style={{borderRadius:6,marginBottom:7,fontSize:18,backgroundColor:'red',height:40,color:'white',paddingTop:5,textAlign:"center"}}>{errorMessage}</Text>
+                    :
+                    null
+                }
+                <TextInput onChangeText={(input)=>{setUserInput({...userInput,username:input})}} style={styles.textInput} placeholderTextColor='#8a8a8a' placeholder='Username or Phone number' />
+                <TextInput onChangeText={(input)=>{setUserInput({...userInput,password:input})}} style={styles.textInput} secureTextEntry={true} placeholderTextColor='#8a8a8a' placeholder='Password'/>
 
                 <Pressable style={styles.btnStyle1} onPress={()=>{
-                    navigation.navigate('OrganizationSite')
+                        authenticateUser(userInput).then(res=>{
+                            if(res.authenticated){
+                                navigation.navigate('OrganizationAdminPanel' , {orgDetails:res.orgDetails})
+                            }
+                            else{
+                                setErrorMessage('Invalid username password combination')
+                                setTimeout(() => {
+                                    setErrorMessage('')
+                                }, 5000);
+                            }
+                        })
+                        
+                        
                     }}>
                     <Text style={styles.textStyle}>Log In</Text>
                 </Pressable>
+
                 <Pressable style={styles.presstyle1} onPress={()=>{
                     navigation.navigate('HomePage')
                     }}>
