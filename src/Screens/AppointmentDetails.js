@@ -33,9 +33,9 @@ export default function AppointmentDetails({navigation,route}) {
 
     /* *********************** */
     const [previousSection, SetpreviousSection] = useState('');
-    const [day, SetDay] = useState('');
-    const [month, SetMonth] = useState('');
-    const [year, SetYear] = useState('');
+    const [day, SetDay] = useState(new Date().getDate());
+    const [month, SetMonth] = useState(new Date().getMonth()+1);
+    const [year, SetYear] = useState(new Date().getFullYear());
     //states = choose-service || choose-date || show-available-appointments
 
     //get All Apps From the DB
@@ -48,7 +48,7 @@ export default function AppointmentDetails({navigation,route}) {
     /*  DATE Region */
     const [date, setDate] = useState(new Date());
     const [displayDate, SetdisplayDate] = useState(false);
-    const [showSelectedDate, SetshowSelectedDate] = useState(false);
+    const [showSelectedDate, SetshowSelectedDate] = useState(true);
 
     const [branchClosed, SetbranchClosed] = useState();
     Moment.locale('en');
@@ -189,11 +189,11 @@ export default function AppointmentDetails({navigation,route}) {
                     </View>
                         
                     :
-                    showSelectedDate ?
+                        showSelectedDate ?
 
-                        Availableappointments
-                    :
-                        null
+                            Availableappointments
+                        :
+                            null
             }
         </View>
         )
@@ -277,6 +277,7 @@ const styles = StyleSheet.create({
         borderRadius:4,
         padding:10,
         marginBottom:10,
+        marginRight:10,
     },
     phoneContainer:{
         margin:"30%",

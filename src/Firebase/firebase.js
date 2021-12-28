@@ -233,15 +233,32 @@ export const authenticateUser = async (userDetails) => {
 
   querySnapshot1.forEach((doc) => {
     // doc.data() is never undefined for query doc snapshots
-    let temp = {authenticated:true,orgDetails:doc.data()}
+    let temp = {authenticated:true,orgDetails:doc.data(),orgID:doc.id}
     authenticationDetails = temp
   });
 
   querySnapshot2.forEach((doc) => {
     // doc.data() is never undefined for query doc snapshots
-    let temp = {authenticated:true,orgDetails:doc.data()}
+    let temp = {authenticated:true,orgDetails:doc.data(),orgID:doc.id}
     authenticationDetails = temp
     // return doc.data()
   });
   return authenticationDetails
+}
+
+export const getAppsOfSpecificOrg = async (orgID) => {
+
+  let dataCol = collection(db, "appointments");
+
+  const q = query(dataCol, where("orgID", "==", orgID) );
+
+  const querySnapshot = await getDocs(q);
+
+  let dataList = querySnapshot.docs.map((doc) => {
+    if (doc.data().appID) {
+     return doc.data() ;
+    }
+     return {...doc.data() , appID:doc.id};
+   });
+   return dataList;
 }

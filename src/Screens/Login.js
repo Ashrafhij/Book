@@ -46,7 +46,7 @@ export default function Login({navigation,route}) {
                 <Pressable style={styles.btnStyle1} onPress={()=>{
                         authenticateUser(userInput).then(res=>{
                             if(res.authenticated){
-                                navigation.navigate('OrganizationAdminPanel' , {orgDetails:res.orgDetails})
+                                navigation.navigate('OrganizationAdminPanel' , {orgDetails:res.orgDetails,orgID:res.orgID})
                             }
                             else{
                                 setErrorMessage('Invalid username password combination')
